@@ -22,7 +22,7 @@
         <h2>elements</h2>
         <div class="panel panel-warning" ui-sortable="sortableOptions" ng-model="structure.unallocated">
             <div class="btn btn-block btn-danger" ng-repeat="elem in structure.unallocated">{{ elem.title }}</div>
-            <h3 class="panel panel-danger" ng-if="structure.unallocated.length===0">
+            <h3 ng-if="structure.unallocated.length===0">
                 no elements here
             </h3>
         </div>
@@ -37,11 +37,9 @@
         </div>
     </div>
     <div class="col-xs-4" ng-if="structure.columns.length===0">
-        <h2>dropable area</h2>
+        <h2>dropable areas</h2>
         <h3 class="panel panel-info">
             no areas here
         </h3>
-    </div>
-    <div class="col-xs-2">
     </div>
 </div>
