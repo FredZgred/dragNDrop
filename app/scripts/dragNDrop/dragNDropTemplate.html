@@ -6,7 +6,7 @@
         <div class="panel-body">
             <div class="col-xs-3">
                 <label for="numOfDropColumns" class="label label-default">number of dropable columns:</label>
-                <input id="numOfDropColumns" class="form-control" type="number" ng-model="structure.dropAreasCount" />
+                <input id="numOfDropColumns" class="form-control" type="number" ng-model="dropAreasCount" />
             </div>
             <div class="col-xs-9">
                 <label for="json" class="label label-default">paste JSON here:</label>
@@ -29,11 +29,8 @@
     </div>
     <div class="col-xs-2" ng-repeat="col in structure.columns">
         <h2>area {{ $index + 1 }}</h2>
-        <div class="thumbnail droppable-area" style="min-height: 80px;" ui-sortable="sortableOptions" ng-model="col">
+        <div class="thumbnail droppable-area" ui-sortable="sortableOptions" ng-model="col">
             <div class="btn btn-block btn-info" ng-repeat="elem in col">{{ elem.title }}<span class="remove" ng-click="removeItem( elem, col )"></span></div>
-            <h3 ng-if="col.length===0">
-                no elements here
-            </h3>
         </div>
     </div>
     <div class="col-xs-4" ng-if="structure.columns.length===0">

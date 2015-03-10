@@ -17,20 +17,6 @@
             { title: 'fourthElem', type: 0 },
             { title: 'fifthElem', type: 0 }
         ];
-
-        //ctrl.DnDOptions = {
-        //    dropAreasCount: 3,
-        //    unallocated: ,
-        //    columns: [
-        //        [
-        //        ],
-        //        [
-        //        ],
-        //        [],
-        //        [
-        //        ]
-        //    ]
-        //};
     }
 
     angular.module( 'project' )

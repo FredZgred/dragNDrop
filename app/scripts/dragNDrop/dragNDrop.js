@@ -14,13 +14,15 @@
     function controller( $scope ) {
         $scope.structure = {};
         $scope.structure.unallocated = $scope.ngModel || [];
+        $scope.structure.columns =[
+            [], [], []
+        ];
+        $scope.dropAreasCount = 3;
     }
 
     function link( scope ) {
 
         var clearWatch;
-        scope.structure = {};
-
 
         function removeCols ( num ) {
             num = Math.abs( num );
@@ -40,7 +42,9 @@
             if( num > 0 ) {
                 for( var j=0; j<num; j++ ) {
                     angular.forEach( scope.structure.columns[ scope.structure.columns.length-1 ], function( elem ) {
-                        scope.structure.columns[ scope.structure.columns.length-2 ].push( elem );
+                        if( ifObjectInsideArray( elem, scope.structure.columns[ scope.structure.columns.length-2 ] ) ) {
+                            scope.structure.columns[ scope.structure.columns.length-2 ].push( elem );
+                        }
                     } );
                     scope.structure.columns.splice( scope.structure.columns.length-1, 1 );
                 }
@@ -59,9 +63,9 @@
         }
 
         function setWatch( lastDACount ) {
-            lastDACount = lastDACount || 0;
+            lastDACount = lastDACount || scope.dropAreasCount;
             clearWatch = scope.$watch( function() {
-                return scope.structure.dropAreasCount;
+                return scope.dropAreasCount;
             }, function( newV, oldV ) {
                 if( ( newV>=3 && newV<oldV ) || ( newV>=4 && newV>oldV ) ) {
                     renderColumns( newV - ( oldV || lastDACount ) );
@@ -75,13 +79,66 @@
         };
 
 
+        function validateObject( obj ) {
+            return ( obj.hasOwnProperty( 'title' ) && obj.hasOwnProperty( 'type' ) );
+        }
+
+        function ifObjectInsideArray( obj, array ) {
+            var bool = false;
+            angular.forEach( array, function( elem ) {
+                if( elem.title === obj.title && elem.type === obj.type ) {
+                    bool = true;
+                    return;
+                }
+            });
+            return bool;
+        }
+
+        function ifObjectInUnlocated( obj ) {
+            var bool = false;
+            angular.forEach( scope.structure.unallocated, function( elem ) {
+                if( elem.title === obj.title && elem.type === obj.type ) {
+                    bool = true;
+                    return;
+                }
+            });
+            return bool;
+        }
+
+
         scope.updateFromJson = function() {
-            var lastDACount = scope.structure.dropAreasCount;
+            var lastDACount = scope.structure.columns.length;
             clearWatch();
-            scope.structure = JSON.parse( scope.json );
-            if( scope.structure.dropAreasCount < 3 ) {
-                scope.structure.dropAreasCount = 3;
+            var data = JSON.parse( scope.json );
+
+
+            // validation JSON
+            if( Array.isArray( data.unallocated ) ) {
+                if( data.unallocated.length !== 0 ) {
+                    angular.forEach( data.unallocated, function( elem ) {
+                        if( validateObject( elem ) && !ifObjectInsideArray( elem, data.unallocated ) ) {
+                            scope.structure.unallocated.push( elem );
+                        }
+                    } );
+                }
             }
+            if( Array.isArray( data.columns ) ) {
+                if( data.columns.length !== 0 ) {
+                    angular.forEach( data.columns, function( elem, index ) {
+                        if( elem.length !== 0 ) {
+                            angular.forEach( elem, function( e ) {
+                                if( index >= scope.structure.columns.length-1 ) {
+                                    scope.structure.columns.push( [] );
+                                }
+                                if( validateObject( e ) && !ifObjectInsideArray( e, scope.structure.columns[ index ] ) && ifObjectInUnlocated( e ) ) {
+                                    scope.structure.columns[ index ].push( e );
+                                }
+                            } );
+                        }
+                    } );
+                }
+            }
+            scope.dropAreasCount = scope.structure.columns.length;
             setWatch( lastDACount );
         };
 
@@ -90,26 +147,20 @@
         };
 
 
-        var draggedItem;
         scope.sortableOptions = {
             placeholder: 'btn',
             connectWith: '.droppable-area',
-            start: function (e, ui) {
-                draggedItem = ui.item.scope().elem;
-                console.log(draggedItem);
-            },
             update: function (e, ui) {
-                ui.item.sortable.cancel();
-                if (ctrl.controls !== ui.item.sortable.droptargetModel) {
-                    return;
+                if( ui.item.sortable.sourceModel === scope.structure.unallocated ) {
+                    ui.item.sortable.cancel();
+                    var draggedItem = ui.item.sortable.model,
+                        target = ui.item.sortable.droptarget.scope().col;
+                    if( target.indexOf( draggedItem ) > -1 ) {
+                        return;
+                    }
+                    target.splice( ui.item.sortable.dropindex, 0, draggedItem );
+                    scope.$apply();
                 }
-                var dropindex = ui.item.sortable.dropindex;
-                $timeout(function () {
-                    var property = angular.copy(draggedItem);
-                    ctrl.controls.splice(dropindex, 0, property);
-                    property.id = 'property' + ctrl.controls.length;
-                    ctrl.select(property);
-                });
             }
         };
 
