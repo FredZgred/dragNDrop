@@ -17,10 +17,10 @@
         </div>
     </div>
 </div>
-<div class="row">
+<div class="row drag-n-drop">
     <div class="col-xs-2">
         <h2>elements</h2>
-        <div class="panel panel-warning" ui-sortable="sortableOptions" ng-model="structure.unallocated">
+        <div class="panel panel-warning elements" ui-sortable="sortableOptions" ng-model="structure.unallocated">
             <div class="btn btn-block btn-danger" ng-repeat="elem in structure.unallocated">{{ elem.title }}</div>
             <h3 ng-if="structure.unallocated.length===0">
                 no elements here
@@ -29,8 +29,8 @@
     </div>
     <div class="col-xs-2" ng-repeat="col in structure.columns">
         <h2>area {{ $index + 1 }}</h2>
-        <div class="thumbnail droppable-area" ui-sortable="sortableOptions" ng-model="col">
-            <div class="btn btn-block btn-info" ng-repeat="elem in col">{{ elem.title }}</div>
+        <div class="thumbnail droppable-area" style="min-height: 80px;" ui-sortable="sortableOptions" ng-model="col">
+            <div class="btn btn-block btn-info" ng-repeat="elem in col">{{ elem.title }}<span class="remove" ng-click="removeItem( elem, col )"></span></div>
             <h3 ng-if="col.length===0">
                 no elements here
             </h3>

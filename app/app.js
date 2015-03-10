@@ -1,5 +1,5 @@
 ( function() {
 
     'use strict';
-    angular.module('project', [ 'itc-DnD' ]);
+    angular.module('project', [ 'dragNDropModule' ]);
 })();

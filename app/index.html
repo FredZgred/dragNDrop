@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="scripts/itc-DnD/style.css" />
+    <link rel="stylesheet" href="scripts/dragNDrop/styles.css" />
 </head>
 <body ng-app="project">
 
-    <div class="container">
-        <drag-n-drop></drag-n-drop>
+    <div class="container" ng-controller="projectController as ctrl">
+        <drag-n-drop ng-model="ctrl.elements"></drag-n-drop>
     </div>
 
 
@@ -19,10 +19,8 @@
     <script src="/bower_components/angular/angular.min.js"></script>
     <script src="/bower_components/angular-ui-sortable/sortable.min.js"></script>
 
-    <!-- itc-DnD -->
-    <script src="scripts/itc-DnD/itc-DnD.js"></script>
-    <script src="scripts/itc-DnD/DnDController.js"></script>
-    <script src="scripts/itc-DnD/DnDDirective.js"></script>
+    <!-- DnD -->
+    <script src="scripts/dragNDrop/dragNDrop.js"></script>
 
     <!-- components -->
     <script src="app.js"></script>

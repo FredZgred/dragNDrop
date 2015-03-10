@@ -2,6 +2,20 @@
 
     'use strict';
 
+    var path, pos,
+        scripts = angular.element( 'script' );
+
+    angular.forEach( scripts, function( elem ) {
+        if( ( pos = elem.src.indexOf( 'dragNDrop.js' ) ) > -1 ) {
+            path = elem.src.substr( 0, pos );
+        }
+    } );
+
+    function controller( $scope ) {
+        $scope.structure = {};
+        $scope.structure.unallocated = $scope.ngModel || [];
+    }
+
     function link( scope ) {
 
         var clearWatch;
@@ -71,24 +85,50 @@
             setWatch( lastDACount );
         };
 
+        scope.removeItem = function( elem, col ) {
+            col.splice( col.indexOf( elem ), 1 );
+        };
 
+
+        var draggedItem;
         scope.sortableOptions = {
             placeholder: 'btn',
-            connectWith: '.droppable-area'
+            connectWith: '.droppable-area',
+            start: function (e, ui) {
+                draggedItem = ui.item.scope().elem;
+                console.log(draggedItem);
+            },
+            update: function (e, ui) {
+                ui.item.sortable.cancel();
+                if (ctrl.controls !== ui.item.sortable.droptargetModel) {
+                    return;
+                }
+                var dropindex = ui.item.sortable.dropindex;
+                $timeout(function () {
+                    var property = angular.copy(draggedItem);
+                    ctrl.controls.splice(dropindex, 0, property);
+                    property.id = 'property' + ctrl.controls.length;
+                    ctrl.select(property);
+                });
+            }
         };
 
         setWatch();
     }
 
-    function directive() {
+    function dragNDropDirective() {
         return {
             restrict: 'E',
-            scope: {},
+            scope: {
+                ngModel: '='
+            },
             link: link,
-            templateUrl: 'scripts/itc-DnD/DnDTemplate.html'
+            controller: controller,
+            templateUrl: path + 'dragNDropTemplate.html'
         };
     }
 
-    angular.module( 'itc-DnD' )
-        .directive( 'dragNDrop', directive );
+
+    angular.module('dragNDropModule', [ 'ui.sortable' ])
+            .directive( 'dragNDrop', dragNDropDirective );
 })();
