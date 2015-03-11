@@ -20,6 +20,12 @@ module.exports = function (grunt)
     };
     require('grunt-connect-proxy');
     grunt.loadNpmTasks('grunt-connect-proxy');
+
+
+    // gh-pages
+    grunt.loadNpmTasks('grunt-gh-pages');
+
+
     // Define the configuration for all the tasks
     grunt.initConfig({
 
@@ -185,6 +191,13 @@ module.exports = function (grunt)
             unit: {
                 configFile: 'test/karma.conf.js', singleRun: true
             }
+        },
+
+        'gh-pages': {
+            options: {
+                base: 'app'
+            }, // These files will get pushed to the `gh-pages` branch (the default).
+            src: '**/*'
         }
     });
 

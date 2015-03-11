@@ -11,9 +11,35 @@
         }
     } );
 
+
+    function validateObject( obj ) {
+        return ( obj.hasOwnProperty( 'title' ) && obj.hasOwnProperty( 'type' ) );
+    }
+
+
+    // jesli element juz jest w kolumnie
+    function ifObjectInsideArray( obj, array ) {
+        var bool = false;
+        angular.forEach( array, function( elem ) {
+            if( elem.title === obj.title && elem.type === obj.type ) {
+                bool = true;
+                return;
+            }
+        });
+        return bool;
+    }
+
+
     function controller( $scope ) {
         $scope.structure = {};
-        $scope.structure.unallocated = $scope.ngModel || [];
+        $scope.structure.unallocated = [];
+        if( Array.isArray( $scope.ngModel ) ) {
+            angular.forEach( $scope.ngModel, function( elem ) {
+                if( validateObject( elem ) ) {
+                    $scope.structure.unallocated.push( elem )
+                }
+            } );
+        }
         $scope.structure.columns =[
             [], [], []
         ];
@@ -23,6 +49,17 @@
     function link( scope ) {
 
         var clearWatch;
+
+        function ifObjectInUnlocated( obj ) {
+            var bool = false;
+            angular.forEach( scope.structure.unallocated, function( elem ) {
+                if( elem.title === obj.title && elem.type === obj.type ) {
+                    bool = true;
+                    return;
+                }
+            });
+            return bool;
+        }
 
         function removeCols ( num ) {
             num = Math.abs( num );
@@ -38,11 +75,13 @@
                 }
             }
 
+            console.log( num );
+
             // deleting filled columns when there was not enough empty columns
             if( num > 0 ) {
                 for( var j=0; j<num; j++ ) {
                     angular.forEach( scope.structure.columns[ scope.structure.columns.length-1 ], function( elem ) {
-                        if( ifObjectInsideArray( elem, scope.structure.columns[ scope.structure.columns.length-2 ] ) ) {
+                        if( !ifObjectInsideArray( elem, scope.structure.columns[ scope.structure.columns.length-2 ] ) ) {
                             scope.structure.columns[ scope.structure.columns.length-2 ].push( elem );
                         }
                     } );
@@ -79,33 +118,6 @@
         };
 
 
-        function validateObject( obj ) {
-            return ( obj.hasOwnProperty( 'title' ) && obj.hasOwnProperty( 'type' ) );
-        }
-
-        function ifObjectInsideArray( obj, array ) {
-            var bool = false;
-            angular.forEach( array, function( elem ) {
-                if( elem.title === obj.title && elem.type === obj.type ) {
-                    bool = true;
-                    return;
-                }
-            });
-            return bool;
-        }
-
-        function ifObjectInUnlocated( obj ) {
-            var bool = false;
-            angular.forEach( scope.structure.unallocated, function( elem ) {
-                if( elem.title === obj.title && elem.type === obj.type ) {
-                    bool = true;
-                    return;
-                }
-            });
-            return bool;
-        }
-
-
         scope.updateFromJson = function() {
             var lastDACount = scope.structure.columns.length;
             clearWatch();
@@ -113,30 +125,29 @@
 
 
             // validation JSON
-            if( Array.isArray( data.unallocated ) ) {
-                if( data.unallocated.length !== 0 ) {
-                    angular.forEach( data.unallocated, function( elem ) {
-                        if( validateObject( elem ) && !ifObjectInsideArray( elem, data.unallocated ) ) {
-                            scope.structure.unallocated.push( elem );
-                        }
-                    } );
-                }
+            if( Array.isArray( data.unallocated ) && data.unallocated.length !== 0 ) {
+                angular.forEach( data.unallocated, function( elem ) {
+                    if( validateObject( elem ) && !ifObjectInsideArray( elem, data.unallocated ) ) {
+                        scope.structure.unallocated.push( elem );
+                    }
+                } );
             }
-            if( Array.isArray( data.columns ) ) {
-                if( data.columns.length !== 0 ) {
-                    angular.forEach( data.columns, function( elem, index ) {
+            console.log(data.columns.length);
+            if( Array.isArray( data.columns ) && data.columns.length !== 0  ) {
+                angular.forEach( data.columns, function( elem, index ) {
+                    if( Array.isArray( elem ) ) {
+                        if( index >= scope.structure.columns.length ) {
+                            scope.structure.columns.push( [] );
+                        }
                         if( elem.length !== 0 ) {
                             angular.forEach( elem, function( e ) {
-                                if( index >= scope.structure.columns.length-1 ) {
-                                    scope.structure.columns.push( [] );
-                                }
                                 if( validateObject( e ) && !ifObjectInsideArray( e, scope.structure.columns[ index ] ) && ifObjectInUnlocated( e ) ) {
                                     scope.structure.columns[ index ].push( e );
                                 }
                             } );
                         }
-                    } );
-                }
+                    }
+                } );
             }
             scope.dropAreasCount = scope.structure.columns.length;
             setWatch( lastDACount );
